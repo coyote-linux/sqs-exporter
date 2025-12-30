@@ -20,8 +20,9 @@ public class Worker(
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var config = options.Value;
+        var configuredQueueUrls = config.QueueUrls ?? [];
 
-        if (config.QueueUrls.Count == 0 && !config.AutoDiscoverQueues)
+        if (configuredQueueUrls.Count == 0 && !config.AutoDiscoverQueues)
         {
             logger.LogWarning("No SQS queue URLs configured. Add queue URLs to the SqsExporter:QueueUrls configuration.");
             return;
@@ -33,7 +34,7 @@ public class Worker(
             config.AutoDiscoverQueues,
             config.MaxConcurrentAwsCalls);
 
-        var currentQueueUrls = new List<string>(config.QueueUrls);
+        var currentQueueUrls = new List<string>(configuredQueueUrls);
         var lastDiscoveryUtc = DateTimeOffset.MinValue;
 
         while (!stoppingToken.IsCancellationRequested)
@@ -43,7 +44,7 @@ public class Worker(
             {
                 var discovered = await DiscoverQueueUrlsAsync(config, stoppingToken);
                 var merged = new HashSet<string>(StringComparer.Ordinal);
-                foreach (var url in config.QueueUrls)
+                foreach (var url in configuredQueueUrls)
                 {
                     if (!string.IsNullOrWhiteSpace(url))
                     {
@@ -64,7 +65,7 @@ public class Worker(
 
                 logger.LogInformation(
                     "Queue discovery refresh complete. Configured={ConfiguredCount}, Discovered={DiscoveredCount}, Total={TotalCount}",
-                    config.QueueUrls.Count,
+                    configuredQueueUrls.Count,
                     discovered.Count,
                     currentQueueUrls.Count);
             }

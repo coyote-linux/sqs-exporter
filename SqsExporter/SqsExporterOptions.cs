@@ -4,7 +4,7 @@ public class SqsExporterOptions
 {
     public const string SectionName = "SqsExporter";
 
-    public required List<string> QueueUrls { get; set; }
+    public List<string> QueueUrls { get; set; } = [];
     public int PollingIntervalSeconds { get; set; } = 60;
 
     /// <summary>
