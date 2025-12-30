@@ -43,4 +43,14 @@ public class OtlpOptions
     /// Deployment environment (e.g. production, stage). Exported as an OpenTelemetry resource attribute.
     /// </summary>
     public string? DeploymentEnvironment { get; set; }
+
+    /// <summary>
+    /// OTLP transport protocol: "grpc" (default) or "http/protobuf".
+    /// </summary>
+    public string Protocol { get; set; } = "grpc";
+
+    /// <summary>
+    /// Optional OTLP headers, e.g. "Authorization=Bearer ...".
+    /// </summary>
+    public string? Headers { get; set; }
 }

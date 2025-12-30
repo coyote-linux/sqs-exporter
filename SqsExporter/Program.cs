@@ -1,5 +1,6 @@
 using Amazon.SQS;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Exporter;
 using OpenTelemetry.Resources;
 using SqsExporter;
 
@@ -59,10 +60,39 @@ builder.Services.AddOpenTelemetry()
         .AddOtlpExporter(options =>
         {
             options.Endpoint = new Uri(otlpOptions?.Endpoint ?? "http://localhost:4317");
+            options.Protocol = ParseOtlpProtocol(otlpOptions?.Protocol);
+            if (!string.IsNullOrWhiteSpace(otlpOptions?.Headers))
+            {
+                options.Headers = otlpOptions.Headers;
+            }
         }));
 
 builder.Services.AddSingleton<ISqsMetrics, SqsMetrics>();
 builder.Services.AddHostedService<Worker>();
 
 var host = builder.Build();
+
+// Log effective OTLP settings early to help diagnose "no data in SigNoz" issues.
+{
+    var logger = host.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Startup");
+    logger.LogInformation(
+        "OTLP exporter configured. Endpoint={Endpoint}, Protocol={Protocol}, ServiceName={ServiceName}, DeploymentEnvironment={DeploymentEnvironment}",
+        otlpOptions?.Endpoint ?? "http://localhost:4317",
+        (otlpOptions?.Protocol ?? "grpc"),
+        otlpOptions?.ServiceName ?? "sqs-exporter",
+        otlpOptions?.DeploymentEnvironment ?? "(null)");
+}
+
 host.Run();
+
+static OtlpExportProtocol ParseOtlpProtocol(string? value)
+{
+    // Accept common config forms.
+    var v = (value ?? "grpc").Trim();
+    return v.Equals("http/protobuf", StringComparison.OrdinalIgnoreCase) ||
+           v.Equals("http", StringComparison.OrdinalIgnoreCase) ||
+           v.Equals("httpprotobuf", StringComparison.OrdinalIgnoreCase) ||
+           v.Equals("http_protobuf", StringComparison.OrdinalIgnoreCase)
+        ? OtlpExportProtocol.HttpProtobuf
+        : OtlpExportProtocol.Grpc;
+}
