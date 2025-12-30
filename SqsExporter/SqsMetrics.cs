@@ -64,7 +64,12 @@ public class SqsMetrics : ISqsMetrics
             var tags = new TagList
             {
                 { "queue_url", kvp.Key.QueueUrl },
-                { "queue_name", kvp.Key.QueueName }
+                { "queue_name", kvp.Key.QueueName },
+
+                // OpenTelemetry semantic conventions (helps SigNoz querying/grouping)
+                { "messaging.system", "aws_sqs" },
+                { "messaging.destination.name", kvp.Key.QueueName },
+                { "messaging.destination.kind", "queue" }
             };
 
             yield return new Measurement<long>(selector(kvp.Value), tags);
