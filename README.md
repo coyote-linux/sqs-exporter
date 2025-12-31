@@ -61,3 +61,8 @@ sudo systemctl enable --now sqs-exporter
 ```
 
 Edit `/etc/sqs-exporter/sqs-exporter.env` and set at least `Otlp__Endpoint` and (optionally) `Otlp__DeploymentEnvironment`.
+
+### Note on systemd hardening
+
+Some systemd hardening options can cause the .NET runtime to crash very early (e.g. core dumps in `libcoreclr.so`).
+If you see that, use the provided `deploy/sqs-exporter.service` as-is and avoid enabling options like `MemoryDenyWriteExecute=true`.

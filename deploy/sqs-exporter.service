@@ -22,16 +22,14 @@ EnvironmentFile=-/etc/sqs-exporter/sqs-exporter.env
 Environment=DOTNET_ENVIRONMENT=Production
 Environment=DOTNET_EnableDiagnostics=0
 
-# Hardening (safe defaults; adjust if needed)
+# Hardening (safe defaults; .NET can be sensitive to some sandboxing settings)
 NoNewPrivileges=true
 PrivateTmp=true
-ProtectSystem=strict
+ProtectSystem=full
 ProtectHome=true
 ProtectKernelTunables=true
 ProtectKernelModules=true
 ProtectControlGroups=true
-LockPersonality=true
-MemoryDenyWriteExecute=true
 RestrictSUIDSGID=true
 
 # Allow reading config and publishing logs
