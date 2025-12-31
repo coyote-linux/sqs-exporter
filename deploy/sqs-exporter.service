@@ -1,0 +1,52 @@
+[Unit]
+Description=SQS Exporter (OpenTelemetry metrics -> SigNoz)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+
+# Create a dedicated account, e.g.:
+#   sudo useradd --system --no-create-home --shell /usr/sbin/nologin sqs-exporter
+User=sqs-exporter
+Group=sqs-exporter
+
+# Directory where you place the published files (see README)
+WorkingDirectory=/opt/sqs-exporter
+ExecStart=/usr/bin/dotnet /opt/sqs-exporter/SqsExporter.dll
+
+# Load overrides (OTLP endpoint, discovery flags, region, etc.)
+EnvironmentFile=-/etc/sqs-exporter/sqs-exporter.env
+
+# Typical runtime settings
+Environment=DOTNET_ENVIRONMENT=Production
+Environment=DOTNET_EnableDiagnostics=0
+
+# Hardening (safe defaults; adjust if needed)
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+RestrictSUIDSGID=true
+
+# Allow reading config and publishing logs
+ReadWritePaths=/var/log/sqs-exporter
+
+# Restart behavior
+Restart=on-failure
+RestartSec=5
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=sqs-exporter
+
+[Install]
+WantedBy=multi-user.target
+
+

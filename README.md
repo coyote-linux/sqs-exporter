@@ -35,3 +35,29 @@ All SQS metrics are emitted with:
 
 - `queue_name`
 - `queue_url`
+
+## systemd (Linux)
+
+### Publish the app
+
+Example (framework-dependent):
+
+```bash
+dotnet publish SqsExporter/SqsExporter.csproj -c Release -o /opt/sqs-exporter
+```
+
+### Install service + config
+
+```bash
+sudo useradd --system --no-create-home --shell /usr/sbin/nologin sqs-exporter || true
+sudo install -d -o sqs-exporter -g sqs-exporter /etc/sqs-exporter /var/log/sqs-exporter
+
+sudo install -m 0644 deploy/sqs-exporter.service /etc/systemd/system/sqs-exporter.service
+sudo install -m 0640 deploy/sqs-exporter.env.example /etc/sqs-exporter/sqs-exporter.env
+sudo chown root:sqs-exporter /etc/sqs-exporter/sqs-exporter.env
+
+sudo systemctl daemon-reload
+sudo systemctl enable --now sqs-exporter
+```
+
+Edit `/etc/sqs-exporter/sqs-exporter.env` and set at least `Otlp__Endpoint` and (optionally) `Otlp__DeploymentEnvironment`.
