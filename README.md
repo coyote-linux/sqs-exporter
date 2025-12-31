@@ -43,18 +43,18 @@ All SQS metrics are emitted with:
 Example (framework-dependent):
 
 ```bash
-dotnet publish SqsExporter/SqsExporter.csproj -c Release -o /opt/sqs-exporter
+dotnet publish SqsExporter/SqsExporter.csproj -c Release -o /opt/sqs-exporter/bin
 ```
 
 ### Install service + config
 
 ```bash
 sudo useradd --system --no-create-home --shell /usr/sbin/nologin sqs-exporter || true
-sudo install -d -o sqs-exporter -g sqs-exporter /etc/sqs-exporter /var/log/sqs-exporter
+sudo install -d -o sqs-exporter -g sqs-exporter /opt/sqs-exporter/etc /var/log/sqs-exporter
 
 sudo install -m 0644 deploy/sqs-exporter.service /etc/systemd/system/sqs-exporter.service
-sudo install -m 0640 deploy/sqs-exporter.env.example /etc/sqs-exporter/sqs-exporter.env
-sudo chown root:sqs-exporter /etc/sqs-exporter/sqs-exporter.env
+sudo install -m 0640 deploy/sqs-exporter.env.example /opt/sqs-exporter/etc/sqs-exporter.env
+sudo chown root:sqs-exporter /opt/sqs-exporter/etc/sqs-exporter.env
 
 sudo systemctl daemon-reload
 sudo systemctl enable --now sqs-exporter
